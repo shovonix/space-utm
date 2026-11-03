@@ -15,3 +15,9 @@ Built by [Shovon Arifin](https://shovonix.dev). Part of the Space tools, with [S
 No shortener and no redirects: links point straight at your site. Everything lives in `index.html`; there is no build step.
 
 QR encoding by [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT, Kazuhiko Arase).
+
+## Licence
+
+Copyright © 2026 Shovon Arifin. All rights reserved.
+
+The code is public so you can see how Space UTM works. It is not open source: you may not copy, modify, redistribute or host it, in whole or in part, without written permission. Use the live app at the link above.
