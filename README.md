@@ -1,0 +1,15 @@
+# Space Links
+
+A UTM link builder for creators: one video, every place you post it. Live at https://links.shovonix.dev
+
+Built by [Shovon Arifin](https://shovonix.dev). Part of the Space tools, with [Space Prompter](https://studio.shovonix.dev).
+
+- **Placements**: YouTube description, pinned comment, Shorts, community post, channel links, on-screen QR, Instagram, TikTok, X, LinkedIn, Facebook, Threads, Discord, newsletter, podcast notes, plus your own.
+- **Clean names**: campaign names are lowercased and slugged so reports don't split. Existing `utm_` tags are replaced.
+- **GA4-friendly**: the presets use mediums that land in GA4's default channel groups (Organic Video, Organic Social, Email, Audio).
+- **QR codes**: black on white, or white on transparent to drop onto video. 1200 px PNG.
+- **Export**: copy one link, copy all, or download CSV. Recent videos are saved in the browser.
+
+No shortener and no redirects: links point straight at your site. Everything lives in `index.html`; there is no build step.
+
+QR encoding by [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT, Kazuhiko Arase).
