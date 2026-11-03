@@ -1,6 +1,6 @@
 {
-  "name": "Space Links",
-  "short_name": "Links",
+  "name": "Space UTM",
+  "short_name": "UTM",
   "description": "A UTM link builder for creators: one video, every placement.",
   "start_url": "/",
   "scope": "/",

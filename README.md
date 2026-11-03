@@ -1,6 +1,6 @@
-# Space Links
+# Space UTM
 
-A UTM link builder for creators: one video, every place you post it. Live at https://links.shovonix.dev
+A UTM link builder for creators: one video, every place you post it. Live at https://utm.shovonix.dev
 
 Built by [Shovon Arifin](https://shovonix.dev). Part of the Space tools, with [Space Prompter](https://studio.shovonix.dev).
 
