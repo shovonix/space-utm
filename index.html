@@ -123,7 +123,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .inner{max-width:1080px}
 .block{margin-top:22px;padding:22px}
 .block-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-.two{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
 .slug{font:500 12px var(--mono);color:var(--fg-dim);margin-top:2px;min-height:18px;word-break:break-all}
 .slug b{color:var(--fg);font-weight:600}
 .msgs{display:flex;flex-direction:column;gap:6px;margin-top:14px}
@@ -202,7 +203,7 @@ details.adv .inner-adv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)
   <div class="row" style="align-items:flex-end">
     <div>
       <h1 class="page">Build tracked links</h1>
-      <p class="lead">One video, every place you post it. Clean UTM links for your description, comments, bios and newsletter.</p>
+      <p class="lead">One video, every place you post it. Short, dated UTM links for your description, comments, bios and newsletter.</p>
     </div>
     <div class="spacer"></div>
     <button class="btn ghost sm pill" id="demo-btn"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z" fill="currentColor"/></svg>Example</button>
@@ -216,8 +217,11 @@ details.adv .inner-adv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)
         <input class="input" id="dest" placeholder="https://yoursite.com/product" inputmode="url" autocomplete="off" spellcheck="false">
       </div>
       <div class="field">
-        <label for="camp">Video or campaign</label>
-        <input class="input" id="camp" placeholder="e.g. Fix your audio" autocomplete="off">
+        <label for="camp">Campaign code</label>
+        <div class="row" style="gap:8px;flex-wrap:nowrap">
+          <input class="input" id="camp" placeholder="e.g. fp" autocomplete="off" spellcheck="false" style="flex:1;min-width:0">
+          <input class="input" id="cdate" type="date" aria-label="Campaign date" style="width:150px;flex:none;font-family:var(--mono);font-size:13px">
+        </div>
         <div class="slug" id="slug"></div>
       </div>
     </div>
@@ -235,11 +239,12 @@ details.adv .inner-adv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)
       <button class="btn sm" id="c-add" style="height:36px">Add</button>
     </div>
     <details class="adv" id="adv">
-      <summary>Naming rules and extra fields</summary>
+      <summary>Format, naming rules and extra fields</summary>
       <div class="inner-adv">
         <div class="field"><label for="term">utm_term (optional)</label><input class="input" id="term" placeholder="keyword or variant" autocomplete="off"></div>
         <div class="field"><span class="lbl">Word separator</span><div class="seg" id="sep"><button data-v="-">dash-case</button><button data-v="_">under_score</button></div></div>
         <div class="field"><span class="lbl">Clean up</span><label class="chk" style="height:40px"><input type="checkbox" id="lower"> Lowercase, no spaces</label></div>
+        <div class="field" style="grid-column:1/-1"><label class="chk"><input type="checkbox" id="content"> Tag each placement with utm_content, so the description and pinned comment show up as separate rows. Turn off for the plain MGD format.</label></div>
       </div>
       <p class="hint" style="margin-top:12px">The presets follow GA4's default channel groups: YouTube video placements land in <b>Organic Video</b>, social posts in <b>Organic Social</b>, the newsletter in <b>Email</b> and podcast notes in <b>Audio</b>. Lowercase keeps "YouTube" and "youtube" from splitting into two rows in your reports.</p>
     </details>
@@ -299,8 +304,9 @@ const P = [
   { g: 'Other', id: 'email', label: 'Newsletter', s: 'newsletter', m: 'email', c: 'issue' },
   { g: 'Other', id: 'podcast', label: 'Podcast notes', s: 'podcast', m: 'audio', c: 'show-notes' },
 ];
-const blank = () => ({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), dest: '', camp: '', term: '', sel: ['yt-desc', 'yt-pin'], custom: [], updated: Date.now() });
-const S = Object.assign({ items: [], active: null, sep: '-', lower: true, lastSel: ['yt-desc', 'yt-pin'] }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const blank = () => ({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), dest: '', camp: '', date: today(), term: '', sel: ['yt-desc', 'yt-pin'], custom: [], updated: Date.now() });
+const S = Object.assign({ items: [], active: null, sep: '-', lower: true, content: true, lastSel: ['yt-desc', 'yt-pin'] }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
 let saveT; const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1800); }
@@ -312,6 +318,13 @@ function clean(v) {
   if (!S.lower) return v;
   return v.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
     .replace(/&/g, ' and ').replace(/['’]/g, '').replace(/[^\p{L}\p{N}]+/gu, S.sep).replace(new RegExp('\\' + S.sep + '+', 'g'), S.sep).replace(new RegExp('^\\' + S.sep + '|\\' + S.sep + '$', 'g'), '');
+}
+function ddmmyy(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + m[2] + m[1].slice(2) : ''; }
+function campaign(c) {
+  const code = clean(c.camp);
+  const d = ddmmyy(c.date || today());
+  if (!code) return 'video' + d;
+  return code + (code.includes(S.sep) ? S.sep : '') + d;
 }
 function placements(c) { return P.filter((p) => c.sel.includes(p.id)).concat(c.custom.filter((p) => c.sel.includes(p.id))); }
 function normalizeDest(raw) {
@@ -327,8 +340,8 @@ function build(u, p, c) {
   const fix = (v) => S.lower ? clean(v) : String(v || '').trim();
   x.searchParams.set('utm_source', fix(p.s));
   x.searchParams.set('utm_medium', fix(p.m));
-  x.searchParams.set('utm_campaign', clean(c.camp) || 'video');
-  if (p.c) x.searchParams.set('utm_content', S.lower ? fix(p.c).replace(/[-_]/g, sep) : p.c);
+  x.searchParams.set('utm_campaign', campaign(c));
+  if (p.c && S.content) x.searchParams.set('utm_content', S.lower ? fix(p.c).replace(/[-_]/g, sep) : p.c);
   if (c.term.trim()) x.searchParams.set('utm_term', fix(c.term));
   return x.href;
 }
@@ -352,15 +365,17 @@ function render() {
     if (!/^https?:\/\//i.test(c.dest.trim())) msgs.push(['ok', `Added https:// to the front.`]);
   }
   const raw = (c.camp || '').trim();
-  if (raw && S.lower && clean(raw) !== raw) msgs.push(['ok', `Cleaned the campaign name: “${esc(raw)}” → ${esc(clean(raw))}`]);
-  if (/(([^a-df-z]|^)shop|shopping)/i.test(clean(raw))) msgs.push(['warn', 'Because the campaign name contains \u201cshop\u201d, GA4 will likely file this traffic under Organic Shopping instead of Organic Video. Rename it if you want it counted as video traffic.']);
-  if (url && !raw) msgs.push(['warn', 'Name the video so each one gets its own row in your reports. Until then the campaign is “video”.']);
+  if (raw && S.lower && clean(raw) !== raw) msgs.push(['ok', `Cleaned the code: “${esc(raw)}” → ${esc(clean(raw))}`]);
+  if (/(([^a-df-z]|^)shop|shopping)/i.test(campaign(c))) msgs.push(['warn', 'Because the campaign name contains \u201cshop\u201d, GA4 will likely file this traffic under Organic Shopping instead of Organic Video. Rename it if you want it counted as video traffic.']);
+  if (url && !raw) msgs.push(['warn', `Add a short code for the product or video (like fp). Until then the campaign is “${campaign(c)}”.`]);
   $('#msgs').innerHTML = msgs.map(([k, t]) => `<div class="msg ${k}">${t}</div>`).join('');
-  $('#slug').innerHTML = raw ? `utm_campaign=<b>${esc(clean(raw) || '')}</b>` : '';
+  $('#slug').innerHTML = `utm_campaign=<b>${esc(campaign(c))}</b> <span style="color:var(--fg-faint)">· code + date, DDMMYY</span>`;
 
   const pls = placements(c);
   built = url ? pls.map((p) => ({ p, href: build(url, p, c) })) : [];
   $('#count').textContent = built.length ? `${built.length} link${built.length > 1 ? 's' : ''}` : '';
+  const uniq = new Set(built.map((b) => b.href)).size;
+  if (built.length && uniq < built.length) $('#count').textContent += ` · ${built.length - uniq + 1 > 1 ? 'some placements share the same link (utm_content is off)' : ''}`;
   $('#links').innerHTML = !url
     ? '<div class="empty">Add a destination URL to see your links.</div>'
     : !pls.length ? '<div class="empty">Pick at least one place you’ll post it.</div>'
@@ -377,12 +392,13 @@ function renderRail() {
   const list = S.items.filter((x) => x.dest || x.camp || x.id === S.active);
   $('#rail-list').innerHTML = list.map((x) => {
     let host = ''; try { host = x.dest ? normalizeDest(x.dest).url.hostname.replace(/^www\./, '') : ''; } catch (e) {}
-    return `<div class="rail-item${x.id === S.active ? ' active' : ''}" data-id="${x.id}" role="button" tabindex="0"><span class="nm">${esc(x.camp || host || 'New video')}</span><span class="sub">${x.sel.length}</span><span class="del" data-del="${x.id}" title="Delete">×</span></div>`;
+    return `<div class="rail-item${x.id === S.active ? ' active' : ''}" data-id="${x.id}" role="button" tabindex="0"><span class="nm">${esc(x.camp ? campaign(x) : (host || 'New video'))}</span><span class="sub">${x.sel.length}</span><span class="del" data-del="${x.id}" title="Delete">×</span></div>`;
   }).join('') || '<div class="rail-empty">Your videos show up here.</div>';
 }
 function syncInputs() {
   const c = cur();
-  $('#dest').value = c.dest; $('#camp').value = c.camp; $('#term').value = c.term;
+  if (!c.date) c.date = today();
+  $('#dest').value = c.dest; $('#camp').value = c.camp; $('#cdate').value = c.date; $('#term').value = c.term; $('#content').checked = S.content;
   $('#lower').checked = S.lower;
   document.querySelectorAll('#sep button').forEach((b) => b.classList.toggle('on', b.dataset.v === S.sep));
   if (c.term) $('#adv').open = true;
@@ -393,6 +409,8 @@ const touch = () => { const c = cur(); c.updated = Date.now(); S.lastSel = c.sel
 $('#dest').addEventListener('input', (e) => { cur().dest = e.target.value; touch(); });
 $('#camp').addEventListener('input', (e) => { cur().camp = e.target.value; touch(); });
 $('#term').addEventListener('input', (e) => { cur().term = e.target.value; touch(); });
+$('#cdate').addEventListener('change', (e) => { cur().date = e.target.value || today(); e.target.value = cur().date; touch(); });
+$('#content').addEventListener('change', (e) => { S.content = e.target.checked; save(); render(); });
 $('#lower').addEventListener('change', (e) => { S.lower = e.target.checked; save(); render(); });
 $('#sep').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.sep = b.dataset.v; syncInputs(); save(); render(); });
 function togglePl(id) { const c = cur(); c.sel = c.sel.includes(id) ? c.sel.filter((x) => x !== id) : c.sel.concat(id); touch(); }
@@ -424,7 +442,7 @@ $('#links').addEventListener('click', async (e) => {
 $('#copy-all').addEventListener('click', async () => {
   if (!built.length) return toast('Nothing to copy yet');
   const c = cur();
-  const text = [`${c.camp || 'Links'}`, ''].concat(built.map((b) => `${b.p.label}: ${b.href}`)).join('\n');
+  const text = [campaign(c), ''].concat(built.map((b) => `${b.p.label}: ${b.href}`)).join('\n');
   if (await copy(text)) toast(`${built.length} links copied`);
 });
 $('#dl-csv').addEventListener('click', () => {
@@ -433,7 +451,7 @@ $('#dl-csv').addEventListener('click', () => {
   const rows = [['Placement', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'URL'].map(q).join(',')];
   built.forEach((b) => { const u = new URL(b.href).searchParams; rows.push([b.p.label, u.get('utm_source'), u.get('utm_medium'), u.get('utm_campaign'), u.get('utm_content') || '', u.get('utm_term') || '', b.href].map(q).join(',')); });
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' }));
-  a.download = (clean(c.camp) || 'links') + '-utm-links.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  a.download = campaign(c) + '-utm-links.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
 $('#rail-new').addEventListener('click', () => {
   S.items = S.items.filter((x) => x.dest || x.camp);
@@ -453,7 +471,7 @@ $('#rail-list').addEventListener('click', (e) => {
 $('#rail-toggle').addEventListener('click', () => $('#rail').classList.toggle('open'));
 $('#demo-btn').addEventListener('click', () => {
   let c = cur(); if (c.dest || c.camp) { c = blank(); S.items.unshift(c); S.active = c.id; }
-  Object.assign(c, { dest: 'shop.example.com/mic-kit?ref=yt', camp: 'Fix Your Audio in 5 Minutes', term: '', sel: ['yt-desc', 'yt-pin', 'yt-qr', 'ig-bio', 'email'] });
+  Object.assign(c, { dest: 'fluentplayer.com/pricing/', camp: 'fp', date: today(), term: '', sel: ['yt-desc', 'yt-pin', 'yt-qr', 'ig-bio', 'email'] });
   save(); syncInputs(); render();
 });
 
@@ -481,7 +499,7 @@ $('#qr').addEventListener('click', (e) => { if (e.target.id === 'qr') $('#qr').c
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#qr').classList.remove('open'); });
 $('#qr-dl').addEventListener('click', () => {
   const c = document.createElement('canvas'); drawQR(c, qrItem.href, 1200, qrStyle);
-  c.toBlob((blob) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${clean(cur().camp) || 'link'}-${clean(qrItem.p.label)}-qr.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }, 'image/png');
+  c.toBlob((blob) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${campaign(cur())}-${clean(qrItem.p.label)}-qr.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }, 'image/png');
 });
 
 syncInputs(); render();

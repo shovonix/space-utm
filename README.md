@@ -5,7 +5,9 @@ A UTM link builder for creators: one video, every place you post it. Live at htt
 Built by [Shovon Arifin](https://shovonix.dev). Part of the Space tools, with [Space Prompter](https://studio.shovonix.dev).
 
 - **Placements**: YouTube description, pinned comment, Shorts, community post, channel links, on-screen QR, Instagram, TikTok, X, LinkedIn, Facebook, Threads, Discord, newsletter, podcast notes, plus your own.
-- **Clean names**: campaign names are lowercased and slugged so reports don't split. Existing `utm_` tags are replaced.
+- **Short, dated campaigns**: `utm_campaign` is a short code plus the date as DDMMYY, e.g. `fp220726`. The date defaults to today and can be changed, so old links can be rebuilt exactly.
+- **Per-placement tag**: `utm_content` tells the description apart from the pinned comment. Turn it off for the plain `source / medium / campaign` format.
+- **Clean names**: codes are lowercased so reports don't split. Existing `utm_` tags are replaced.
 - **GA4-friendly**: the presets use mediums that land in GA4's default channel groups (Organic Video, Organic Social, Email, Audio).
 - **QR codes**: black on white, or white on transparent to drop onto video. 1200 px PNG.
 - **Export**: copy one link, copy all, or download CSV. Recent videos are saved in the browser.
