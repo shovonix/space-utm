@@ -21,3 +21,5 @@ QR encoding by [qrcode-generator](https://github.com/kazuhikoarase/qrcode-genera
 Copyright © 2026 Shovon Arifin. All rights reserved.
 
 The code is public so you can see how Space UTM works. It is not open source: you may not copy, modify, redistribute or host it, in whole or in part, without written permission. Use the live app at the link above.
+
+The bundled QR code library (qrcode-generator by Kazuhiko Arase) keeps its own MIT licence.
