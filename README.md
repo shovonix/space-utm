@@ -2,7 +2,7 @@
 
 A UTM link builder for creators: one video, every place you post it. Live at https://utm.shovonix.dev
 
-Built by [Shovon Arifin](https://shovonix.dev). Part of the Space tools, with [Space Prompter](https://studio.shovonix.dev).
+Built by [Shovon Arifin](https://shovonix.dev). Part of the Space tools, with [Space Prompter](https://prompter.shovonix.dev).
 
 - **Placements**: YouTube description, pinned comment, Shorts, community post, channel links, on-screen QR, Instagram, TikTok, X, LinkedIn, Facebook, Threads, Discord, newsletter, podcast notes, plus your own.
 - **Short, dated campaigns**: `utm_campaign` is a short code plus the date as DDMMYY, e.g. `fp220726`. The date defaults to today and can be changed, so old links can be rebuilt exactly.
