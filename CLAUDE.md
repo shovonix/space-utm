@@ -31,7 +31,7 @@ UTM link builder for creators: one video, every place it's posted. Live at https
 
 ## Workflow
 - Work on the Mac in `~/Sites/space/space-utm`. Preview locally, commit small, push to `main`.
-- Live files: `/home/utm/htdocs/utm.shovonix.dev` (CloudPanel site user `utm`). Landing page lives on the hub: `/home/shovonix/htdocs/shovonix.dev/space-utm/`.
+- Live files: `/home/utm/htdocs/utm.shovonix.dev` (CloudPanel site user `utm`). Landing page (`landing/space-utm/`) lives on the hub at `/home/shovonix/htdocs/shovonix.dev/space-utm/`; deploy it with `deploy-space hub`.
 - Deploy: push to `main`, then on the VPS run `deploy-space utm` as root. It pulls `main` as user `utm` (fast-forward only) and checks the site returns 200.
 - Git data lives outside the web root at `/home/utm/space-utm.git` (so `.git` is never served). `landing/`, `README.md` and `CLAUDE.md` are excluded from the live folder via sparse-checkout.
 - Never edit the live files on the VPS directly.
